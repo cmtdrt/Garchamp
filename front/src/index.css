@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 30 100% 98%;
+    --foreground: 25 95% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 25 95% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 95% 15%;
+
+    --primary: 18 100% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 25 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 30 40% 96%;
+    --muted-foreground: 25 20% 45%;
+
+    --accent: 25 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 30% 90%;
+    --input: 30 30% 88%;
+    --ring: 18 100% 62%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 25 95% 15%;
+    --sidebar-primary: 18 100% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 100% 96%;
+    --sidebar-accent-foreground: 25 95% 15%;
+    --sidebar-border: 30 30% 92%;
+    --sidebar-ring: 18 100% 62%;
+
+    /* Garfield-inspired custom colors */
+    --orange-light: 25 100% 75%;
+    --orange-soft: 30 100% 88%;
+    --cream: 40 100% 97%;
+    
+    /* Allergen badge colors */
+    --allergen-gluten: 45 100% 65%;
+    --allergen-dairy: 200 80% 65%;
+    --allergen-nuts: 30 85% 55%;
+    --allergen-soy: 100 60% 50%;
+    --allergen-egg: 50 100% 70%;
+    --allergen-fish: 210 90% 60%;
+    --allergen-shellfish: 340 70% 60%;
+    
+    /* Gradient */
+    --gradient-primary: linear-gradient(135deg, hsl(18 100% 62%) 0%, hsl(25 100% 50%) 100%);
+    --gradient-soft: linear-gradient(180deg, hsl(40 100% 97%) 0%, hsl(30 100% 98%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 2px 20px hsl(25 100% 50% / 0.1);
+    --shadow-medium: 0 4px 30px hsl(25 100% 50% / 0.15);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 25 40% 8%;
+    --foreground: 30 100% 98%;
+
+    --card: 25 35% 12%;
+    --card-foreground: 30 100% 98%;
+
+    --popover: 25 35% 12%;
+    --popover-foreground: 30 100% 98%;
+
+    --primary: 18 100% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 25 40% 20%;
+    --secondary-foreground: 30 100% 98%;
+
+    --muted: 25 30% 18%;
+    --muted-foreground: 30 20% 65%;
+
+    --accent: 25 60% 25%;
+    --accent-foreground: 30 100% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 25 30% 22%;
+    --input: 25 30% 20%;
+    --ring: 18 100% 62%;
+    
+    --sidebar-background: 25 35% 12%;
+    --sidebar-foreground: 30 100% 98%;
+    --sidebar-primary: 18 100% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 40% 18%;
+    --sidebar-accent-foreground: 30 100% 98%;
+    --sidebar-border: 25 30% 20%;
+    --sidebar-ring: 18 100% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
