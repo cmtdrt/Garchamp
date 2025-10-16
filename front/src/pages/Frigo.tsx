@@ -1,33 +1,92 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Info } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-import { FoodItem } from "@/types/FoodItem";
-import { getFoodItems, addFoodItem, deleteFoodItem } from "@/services/fridgeService";
+// Types
+export type FoodItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  expiryDate?: string;
+  allergens?: string[];
+  macros?: {
+    energy_kcal: number;
+    protein_g: number;
+    fat_g: number;
+    carbohydrate_g: number;
+    fiber_g: number;
+    sugar_g: number;
+    salt_g: number;
+  };
+};
 
+// Couleurs pour tous les allergènes
 const allergenColors: Record<string, string> = {
-  gluten: "bg-allergen-gluten",
-  lactose: "bg-allergen-dairy",
-  noix: "bg-allergen-nuts",
-  soja: "bg-allergen-soy",
-  oeuf: "bg-allergen-egg",
+  "Gluten": "bg-yellow-400",
+  "Crustacés": "bg-blue-500",
+  "Œufs": "bg-orange-400",
+  "Poissons": "bg-cyan-500",
+  "Arachides": "bg-amber-800",
+  "Soja": "bg-lime-600",
+  "Lait": "bg-stone-300",
+  "Fruits à coque": "bg-yellow-900",
+  "Céleri": "bg-green-500",
+  "Moutarde": "bg-yellow-500",
+  "Sésame": "bg-black",
+  "Sulfites": "bg-gray-400",
+  "Lupin": "bg-violet-500",
+  "Mollusques": "bg-blue-900",
+};
+
+const STORAGE_KEY = "fridge_items";
+
+const beep = () => {
+  const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  oscillator.type = "square";
+  oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+  oscillator.connect(audioCtx.destination);
+  oscillator.start();
+  oscillator.stop(audioCtx.currentTime + 0.2);
 };
 
 const Frigo = () => {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [newItem, setNewItem] = useState({ name: "", quantity: "", unit: "g", expiryDate: "" });
+  const [newItem, setNewItem] = useState({
+    name: "",
+    quantity: "",
+    unit: "g",
+    expiryDate: "",
+  });
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
   const [showMacrosDialog, setShowMacrosDialog] = useState(false);
+  const [temperature, setTemperature] = useState(6); // Température initiale
+  const criticalTemp = 6.5; // Seuil critique
+  const intervalRef = useRef<number | null>(null);
 
-  // Charger les aliments depuis le localStorage
+  // Charger depuis localStorage au montage
   useEffect(() => {
-    setFoodItems(getFoodItems());
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (localData) setFoodItems(JSON.parse(localData));
   }, []);
+
+  // Sauvegarder automatiquement dans localStorage
+  const updateLocalStorage = (items: FoodItem[]) => {
+    setFoodItems(items);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  };
 
   // Ajouter un aliment
   const handleAddItem = () => {
@@ -42,52 +101,71 @@ const Frigo = () => {
       quantity: parseFloat(newItem.quantity),
       unit: newItem.unit,
       expiryDate: newItem.expiryDate || undefined,
-      allergens: ["gluten", "lactose"],
+      allergens: ["Gluten"], // Exemple par défaut
       macros: {
         energy_kcal: 250,
-        protein_g: 5.2,
-        fat_g: 3.1,
-        carbohydrate_g: 45.5,
-        fiber_g: 2.8,
-        sugar_g: 8.5,
+        protein_g: 5,
+        fat_g: 3,
+        carbohydrate_g: 45,
+        fiber_g: 2,
+        sugar_g: 8,
         salt_g: 0.5,
       },
     };
 
-    const updated = addFoodItem(item);
-    setFoodItems(updated);
+    updateLocalStorage([...foodItems, item]);
     setNewItem({ name: "", quantity: "", unit: "g", expiryDate: "" });
     toast.success(`${item.name} ajouté au frigo !`);
   };
 
   // Supprimer un aliment
   const handleDeleteItem = (id: string) => {
-    const item = foodItems.find((i) => i.id === id);
-    const updated = deleteFoodItem(id);
-    setFoodItems(updated);
-    toast.success(`${item?.name} retiré du frigo`);
+    const updated = foodItems.filter((item) => item.id !== id);
+    updateLocalStorage(updated);
+    toast.success("Aliment supprimé ✅");
   };
 
-  // Afficher le détail
+  // Afficher les macros
   const handleShowMacros = (item: FoodItem) => {
     setSelectedItem(item);
     setShowMacrosDialog(true);
   };
 
+
+  useEffect(() => {
+    intervalRef.current = window.setInterval(() => {
+      setTemperature((prev) => {
+        const next = prev + 0.01;
+        if (next >= criticalTemp) beep();
+        return next;
+      });
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
+    };
+  }, []);
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-cream p-8">
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-        <header>
+        <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Mon Frigo 🧊</h1>
-          <p className="text-muted-foreground">Gérez vos aliments et leurs dates d'expiration</p>
-        </header>
+          <p className="text-muted-foreground">
+            Gérez vos aliments et surveillez la température !
+          </p>
+          <p className={`mt-2 font-bold ${temperature >= criticalTemp ? "text-red-600" : "text-foreground"}`}>
+            Température : {temperature.toFixed(1)}°C {temperature >= criticalTemp && "⚠️ Trop chaud !"}
+          </p>
+        </div>
 
-        {/* Formulaire d’ajout */}
+        {/* Formulaire ajout */}
         <Card className="p-6 shadow-medium border-2 border-primary/20">
           <h2 className="text-xl font-semibold mb-4">Ajouter un aliment</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <Input
-              placeholder="Nom de l'aliment"
+              placeholder="Nom"
               value={newItem.name}
               onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
             />
@@ -100,7 +178,7 @@ const Frigo = () => {
             <select
               value={newItem.unit}
               onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="g">g</option>
               <option value="kg">kg</option>
@@ -110,33 +188,32 @@ const Frigo = () => {
             </select>
             <Input
               type="date"
-              placeholder="Date d'expiration"
               value={newItem.expiryDate}
               onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
             />
-            <Button onClick={handleAddItem} className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+            <Button onClick={handleAddItem}>
               <Plus className="w-4 h-4 mr-2" /> Ajouter
             </Button>
           </div>
         </Card>
 
-        {/* Liste des aliments */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Mes aliments ({foodItems.length})</h2>
+        {/* Liste aliments */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">
+            Mes aliments ({foodItems.length})
+          </h2>
           {foodItems.length === 0 ? (
             <Card className="p-12 text-center text-muted-foreground">
-              Votre frigo est vide ! Ajoutez des aliments ci-dessus.
+              Votre frigo est vide !
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {foodItems.map((item) => (
-                <Card key={item.id} className="p-4 border-l-4 border-l-primary hover:shadow-medium transition">
+                <Card key={item.id} className="p-4 hover:shadow-medium transition-all border-l-4 border-l-primary">
                   <div className="flex items-start justify-between mb-3">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-semibold text-lg">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {item.quantity} {item.unit}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{item.quantity} {item.unit}</p>
                       {item.expiryDate && (
                         <p className="text-xs text-destructive mt-1">
                           Expire le {new Date(item.expiryDate).toLocaleDateString()}
@@ -152,10 +229,10 @@ const Frigo = () => {
                       </Button>
                     </div>
                   </div>
-                  {item.allergens && (
+                  {item.allergens && item.allergens.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {item.allergens.map((a) => (
-                        <Badge key={a} className={`${allergenColors[a] || "bg-muted"} text-white text-xs`}>
+                        <Badge key={a} className={`${allergenColors[a] || "bg-gray-400"} text-white text-xs`}>
                           {a}
                         </Badge>
                       ))}
@@ -165,10 +242,10 @@ const Frigo = () => {
               ))}
             </div>
           )}
-        </section>
+        </div>
       </div>
 
-      {/* Détails nutritionnels */}
+      {/* Dialog Macros */}
       <Dialog open={showMacrosDialog} onOpenChange={setShowMacrosDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -189,7 +266,7 @@ const Frigo = () => {
                 };
                 return (
                   <div key={key} className="flex justify-between items-center p-3 bg-orange-soft rounded-lg">
-                    <span>{labels[key]}</span>
+                    <span className="font-medium">{labels[key]}</span>
                     <span className="font-bold text-primary">{value}</span>
                   </div>
                 );
