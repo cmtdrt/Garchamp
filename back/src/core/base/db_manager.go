@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	// Import du driver de db.
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -30,15 +31,18 @@ func NewDatabaseManager(dsn string, logger *Logger) (*DatabaseManager, error) {
 	db.SetMaxOpenConns(maxOpenConns)
 	db.SetMaxIdleConns(maxIdleConns)
 	db.SetConnMaxIdleTime(maxConTime * time.Minute)
-
+	ctx := context.Background()
 	// Active les pragmas SQLite pour de meilleures performances
-	if _, err := db.Exec(`
+	if _, err = db.ExecContext(ctx, `
 		PRAGMA journal_mode = WAL;
 		PRAGMA synchronous = NORMAL;
 		PRAGMA cache_size = -64000;
 		PRAGMA busy_timeout = 5000;
 	`); err != nil {
-		db.Close()
+		err = db.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to set SQLite pragmas: %w", err)
+		}
 		return nil, fmt.Errorf("failed to set SQLite pragmas: %w", err)
 	}
 
@@ -46,7 +50,10 @@ func NewDatabaseManager(dsn string, logger *Logger) (*DatabaseManager, error) {
 	defer cancel()
 
 	if err = db.PingContext(pingCtx); err != nil {
-		db.Close()
+		err = db.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to ping database: %w", err)
+		}
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
