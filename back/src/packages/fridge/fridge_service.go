@@ -22,10 +22,6 @@ func newService(repositoryManager *db.RepositoryManager, logger *base.Logger) *s
 	}
 }
 
-// func (s *service) get(ctx context.Context, req *createReq) error {
-// 	nItem := itemdb.NewModel(req.Name, req.Unity, req.Quantity, &req.ExpDate)
-// }
-
 func (s *service) create(ctx context.Context, req *createReq) error {
 	// Récupération des allergènes
 	client := utils.NewOllamaClient("http://localhost:11434")
@@ -168,4 +164,8 @@ func (s *service) getAll(ctx context.Context) ([]Item, error) {
 		result = append(result, *item)
 	}
 	return result, nil
+}
+
+func (s *service) deleteItemByID(ctx context.Context, itemID string) error {
+	return s.repositoryManager.GetItemRepo().Delete(ctx, itemID)
 }
