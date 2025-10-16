@@ -60,3 +60,21 @@ func (c *controller) create(w http.ResponseWriter, r *http.Request) {
 		c.logger,
 	)
 }
+
+func (c *controller) getAll(w http.ResponseWriter, r *http.Request) {
+	items, err := c.service.getAll(r.Context())
+
+	if err != nil {
+		response.RenderAndLog(r.Context(), w, r, response.ErrServer(err), "fridge-getall", c.logger)
+		return
+	}
+
+	response.RenderAndLog(
+		r.Context(),
+		w,
+		r,
+		response.NewSuccessResponse(items, "Fetched successfully"),
+		"fridge-getAll",
+		c.logger,
+	)
+}
