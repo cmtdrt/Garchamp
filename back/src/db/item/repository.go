@@ -60,3 +60,15 @@ func (r *Repository) GetAll(ctx context.Context) ([]ItemLite, error) {
 	}
 	return items, nil
 }
+
+func (r *Repository) Delete(ctx context.Context, itemID string) error {
+	query := "DELETE FROM items WHERE id = ?"
+
+	_, err := r.DBManager.DB.ExecContext(ctx, query, itemID)
+
+	if err != nil {
+		r.Logger.ErrorContext(ctx, "impossible de delete", "err", err)
+		return fmt.Errorf("error")
+	}
+	return nil
+}
