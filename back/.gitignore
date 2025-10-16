@@ -1,0 +1,28 @@
+# Binaire Go
+/bin/
+/obj/
+
+# Fichiers Go compilés
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Fichiers de cache Go
+*.test
+*.out
+
+# Fichiers de configuration de l'éditeur
+.vscode/
+.idea/
+
+# Fichiers temporaires d'éditeurs
+*~
+*.swp
+
+# Dossiers de dépendances (si vous utilisez Go Modules)
+vendor/
+
+# Environement
+*.env

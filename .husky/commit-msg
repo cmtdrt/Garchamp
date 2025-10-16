@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Récupère le message de commit
+commit_msg=$(cat "$1")
+
+# Expression régulière pour vérifier le format
+regex="^:[a-zA-Z0-9_]+: \[[a-zA-Z0-9_-]+\] - .{10,}$"
+
+# Vérifie si le message de commit correspond à la nomenclature
+if [[ ! "$commit_msg" =~ $regex ]]; then
+  # Affichage de l'erreur avec un message personnalisé
+  printf "❌ Erreur : le message de commit ne suit pas la nomenclature attendue.\n\n" 
+  printf "Format attendu :\n" 
+  printf " <gitmoji> <#><numéro_de_ticket> [<feature>] - <description>\n\n" 
+  printf "Exemples valides :\n" 
+  printf " :sparkles: #1234 [AddBTN] - ajout d’un nouveau bouton\n" 
+  printf " :bug: #99 [hotfix] - correction crash au login\n\n" 
+  printf "Exemples invalides :\n" 
+  printf " :sparkles: 1234 [feature] - manque le #\n" 
+  printf " :bug: #12 feature - pas de crochets\n" 
+  printf " :zap: #123 [feature] ajout bouton (pas de -)\n" 
+  exit 1
+
+  # Empêche le commit
+  exit 1
+fi
+exit 0

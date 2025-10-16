@@ -1,0 +1,10 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    url: https://github.com/HackatonM1/Garchamp
+  description: Cette documentation concerne l'API en golang avec CHI du projet GARCHAMP
+  title: GARCHAMP API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
