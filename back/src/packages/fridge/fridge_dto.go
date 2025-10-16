@@ -1,6 +1,8 @@
 package fridge
 
 import (
+	"api/src/core/utils"
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -20,4 +22,24 @@ func (cr *createReq) Bind(_ *http.Request) error {
 		return errors.New("structure de requête invalide")
 	}
 	return nil
+}
+
+type Item struct {
+	ID        int      `json:"id"`
+	Name      string   `json:"name"`
+	Quantity  int      `json:"quantity"`
+	Unit      string   `json:"unit"`
+	ExpDate   string   `json:"exp_date"`
+	Allergens []string `json:"allergens"`
+}
+
+func newItem(id, quantity int, name, unit string, expDate sql.NullString, allergens []string) *Item {
+	return &Item{
+		ID:        id,
+		Quantity:  quantity,
+		Unit:      unit,
+		Name:      name,
+		ExpDate:   utils.NullStringToString(expDate),
+		Allergens: allergens,
+	}
 }

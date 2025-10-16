@@ -3,6 +3,7 @@ package allergendb
 import (
 	"api/src/core/base"
 	"context"
+	"fmt"
 )
 
 type Repository struct {
@@ -31,4 +32,27 @@ func (r *Repository) FindByName(ctx context.Context, name string) int {
 		}
 	}
 	return id
+}
+
+func (r *Repository) GetAllAllergensByRelation(ctx context.Context, itemID int) ([]string, error) {
+	query := `SELECT name FROM allergens a INNER JOIN items_allergens_relation iar ON a.id = iar.allergen_ID  WHERE item_ID = ?;`
+	rslt, err := r.DBManager.DB.QueryContext(ctx, query, itemID)
+
+	if err != nil {
+		return nil, fmt.Errorf("error")
+	}
+	defer rslt.Close()
+
+	var (
+		names = []string{}
+		name  string
+	)
+	for rslt.Next() {
+		err = rslt.Scan(&name)
+		if err != nil {
+			return nil, fmt.Errorf("error")
+		}
+		names = append(names, name)
+	}
+	return names, nil
 }

@@ -83,3 +83,30 @@ func (s *service) create(ctx context.Context, req *createReq) error {
 	}
 	return nil
 }
+
+func (s *service) getAll(ctx context.Context) ([]Item, error) {
+	var (
+		itemRepo      = s.repositoryManager.GetItemRepo()
+		allergenRepo  = s.repositoryManager.GetAllergenRepo()
+		item          *Item
+		result        = []Item{}
+		allergensName []string
+		err           error
+	)
+
+	items, err := itemRepo.GetAll(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, i := range items {
+		allergensName, err = allergenRepo.GetAllAllergensByRelation(ctx, i.ID)
+		if err != nil {
+			return nil, err
+		}
+		item = newItem(i.ID, i.Quantity, i.Name, i.Unit, i.ExpDate, allergensName)
+		result = append(result, *item)
+	}
+	return result, nil
+}
