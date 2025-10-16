@@ -4,8 +4,10 @@
 package utils
 
 import (
+	"api/src/core/base"
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,20 +15,20 @@ import (
 	"time"
 )
 
-// OllamaClient gère les appels à Ollama
+// OllamaClient gère les appels à Ollama.
 type OllamaClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
 }
 
-// OllamaRequest structure de la requête Ollama
+// OllamaRequest structure de la requête Ollama.
 type OllamaRequest struct {
 	Model  string `json:"model"`
 	Prompt string `json:"prompt"`
 	Stream bool   `json:"stream"`
 }
 
-// OllamaResponse structure de chaque ligne de réponse en streaming
+// OllamaResponse structure de chaque ligne de réponse en streaming.
 type OllamaResponse struct {
 	Model     string `json:"model"`
 	Response  string `json:"response"`
@@ -34,20 +36,21 @@ type OllamaResponse struct {
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
-// NewOllamaClient crée un nouveau client Ollama
+const timeout = 500
+
+// NewOllamaClient crée un nouveau client Ollama.
 func NewOllamaClient(baseURL string) *OllamaClient {
 	return &OllamaClient{
 		BaseURL: baseURL,
 		HTTPClient: &http.Client{
-			Timeout: 500 * time.Second, // Timeout plus long pour le streaming
+			Timeout: timeout * time.Second, // Timeout plus long pour le streaming
 		},
 	}
 }
 
-// Prompt envoie un prompt à Ollama et récupère la réponse complète
-func (c *OllamaClient) Prompt(model, prompt string) (string, error) {
-	fmt.Println("🟢 Requête envoyée à Ollama...")
-
+// Prompt envoie un prompt à Ollama et récupère la réponse complète.
+func (c *OllamaClient) Prompt(ctx context.Context, model, prompt string, logger base.Logger) (string, error) {
+	logger.InfoContext(ctx, "🟢 Requête envoyée à Ollama...")
 	// Prépare la requête
 	reqBody := OllamaRequest{
 		Model:  model,
@@ -61,7 +64,7 @@ func (c *OllamaClient) Prompt(model, prompt string) (string, error) {
 	}
 
 	// Crée la requête HTTP
-	req, err := http.NewRequest("POST", c.BaseURL+"/api/generate", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/api/generate", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("erreur création requête: %w", err)
 	}
@@ -81,7 +84,7 @@ func (c *OllamaClient) Prompt(model, prompt string) (string, error) {
 		return "", fmt.Errorf("erreur HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
-	fmt.Println("🟢 Réponse reçue :\n")
+	logger.InfoContext(ctx, "🟢 Réponse reçue :\n")
 
 	// Lit le stream ligne par ligne
 	fullText := ""
@@ -95,13 +98,17 @@ func (c *OllamaClient) Prompt(model, prompt string) (string, error) {
 
 		// Décode chaque ligne JSON
 		var ollamaResp OllamaResponse
-		if err := json.Unmarshal(line, &ollamaResp); err != nil {
+		if err = json.Unmarshal(line, &ollamaResp); err != nil {
 			return "", fmt.Errorf("erreur unmarshalling: %w", err)
 		}
 
 		// Affiche et accumule la réponse
 		if ollamaResp.Response != "" {
+			// Print obligatoire pour l'affichage direct
+			//
+			//revive:disable:forbidigo
 			fmt.Print(ollamaResp.Response)
+			//revive:enable:forbidigo
 			fullText += ollamaResp.Response
 		}
 
@@ -111,16 +118,15 @@ func (c *OllamaClient) Prompt(model, prompt string) (string, error) {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return "", fmt.Errorf("erreur lecture stream: %w", err)
 	}
 
-	fmt.Println("\n\n---\n🧠 Réponse complète :")
 	return fullText, nil
 }
 
-// PromptSilent version sans affichage en temps réel (juste retour final)
-func (c *OllamaClient) PromptSilent(model, prompt string) (string, error) {
+// PromptSilent version sans affichage en temps réel (juste retour final).
+func (c *OllamaClient) PromptSilent(ctx context.Context, model, prompt string) (string, error) {
 	reqBody := OllamaRequest{
 		Model:  model,
 		Prompt: prompt,
@@ -132,7 +138,7 @@ func (c *OllamaClient) PromptSilent(model, prompt string) (string, error) {
 		return "", fmt.Errorf("erreur marshalling: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", c.BaseURL+"/api/generate", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/api/generate", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("erreur création requête: %w", err)
 	}
@@ -160,7 +166,7 @@ func (c *OllamaClient) PromptSilent(model, prompt string) (string, error) {
 		}
 
 		var ollamaResp OllamaResponse
-		if err := json.Unmarshal(line, &ollamaResp); err != nil {
+		if err = json.Unmarshal(line, &ollamaResp); err != nil {
 			return "", fmt.Errorf("erreur unmarshalling: %w", err)
 		}
 
@@ -171,7 +177,7 @@ func (c *OllamaClient) PromptSilent(model, prompt string) (string, error) {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return "", fmt.Errorf("erreur lecture stream: %w", err)
 	}
 
