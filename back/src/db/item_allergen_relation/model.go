@@ -1,10 +1,10 @@
 package itemallergenrelationdb
 
-type model struct {
+type Model struct {
 	ItemID     int
 	AllergenID int
 }
 
-func NewModel(itemID, allergenID int) *model {
-	return &model{ItemID: itemID, AllergenID: allergenID}
+func NewModel(itemID, allergenID int) *Model {
+	return &Model{ItemID: itemID, AllergenID: allergenID}
 }
