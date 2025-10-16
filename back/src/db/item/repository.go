@@ -17,11 +17,17 @@ func NewRepository(db *base.DatabaseManager, logger *base.Logger) *Repository {
 	return &Repository{DBManager: db, Logger: logger}
 }
 
-func (r *Repository) Create(ctx context.Context, name, unit string, quantity int, expDate *string) (sql.Result, error) {
+func (r *Repository) Create(ctx context.Context, name, unit string, quantity, kcal,
+	protein,
+	fat,
+	carbohydrate,
+	fiber,
+	sugar,
+	salt int, expDate *string) (sql.Result, error) {
 	query := `
-	INSERT INTO items (name, unit, quantity, expiration_date) VALUES (?,?,?,?);
+	INSERT INTO items (name, unit, quantity, expiration_date, energy_kcal, protein_g, fat_g, carbohydrate_g, fiber_g, sugar_g, salt_g ) VALUES (?,?,?,?,?,?,?,?,?,?,?);;
 	`
-	res, err := r.DBManager.DB.ExecContext(ctx, query, name, unit, quantity, expDate)
+	res, err := r.DBManager.DB.ExecContext(ctx, query, name, unit, quantity, expDate, kcal, protein, fat, carbohydrate, fiber, sugar, salt)
 
 	if err != nil {
 		r.Logger.ErrorContext(ctx, "impossible de créer l'item", "err", err)
@@ -30,7 +36,7 @@ func (r *Repository) Create(ctx context.Context, name, unit string, quantity int
 	return res, nil
 }
 
-func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
+func (r *Repository) GetAll(ctx context.Context) ([]ItemLite, error) {
 	query := `SELECT id, name, quantity, unit, expiration_date FROM items i `
 	rslt, err := r.DBManager.DB.QueryContext(ctx, query)
 
@@ -40,7 +46,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	defer rslt.Close()
 
 	var (
-		items        = []Model{}
+		items        = []ItemLite{}
 		id, quantity int
 		name, unit   string
 		expDate      *string
@@ -50,7 +56,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error")
 		}
-		items = append(items, *NewModel(id, name, unit, quantity, expDate))
+		items = append(items, *NewItemLite(id, name, unit, quantity, expDate))
 	}
 	return items, nil
 }
