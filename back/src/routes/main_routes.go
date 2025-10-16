@@ -8,6 +8,7 @@ import (
 	_ "api/docs" // revive:disable-line:blank-imports
 	"api/src/core/base"
 	"api/src/db"
+	"api/src/packages/fridge"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,7 +22,6 @@ func SetupRouter(
 	repositoryManager *db.RepositoryManager,
 	logger *base.Logger,
 ) chi.Router {
-	const maxRequestLimit = 100
 	const maxReqDuration = 120 * time.Second
 	r := chi.NewRouter()
 	r.Use(cors.Handler(*corsOptions)) // Gestion des CORS policy
@@ -48,6 +48,7 @@ func SetupRouter(
 				logger.Error("Erreur lors de l'écriture de la réponse", "erreur", err)
 			}
 		})
+		r.Mount("/fridge", fridge.Route(repositoryManager, logger))
 	})
 
 	return r
