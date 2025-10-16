@@ -27,51 +27,110 @@ func newService(repositoryManager *db.RepositoryManager, logger *base.Logger) *s
 // }
 
 func (s *service) create(ctx context.Context, req *createReq) error {
-	// Création de l'item
-	res, err := s.repositoryManager.GetItemRepo().Create(ctx, req.Name, req.Unity, req.Quantity, &req.ExpDate)
-	if err != nil {
-		return err
-	}
-	itemID, _ := res.LastInsertId()
 	// Récupération des allergènes
 	client := utils.NewOllamaClient("http://localhost:11434")
-	prompt := fmt.Sprintf(`
-			Tu es un assistant qui détecte les allergènes dans un produit alimentaire.
+	prompt1 := fmt.Sprintf(`
+Tu es un assistant qui détecte les allergènes dans un produit alimentaire.
 
-			Item: "%s"
+Item: "%s"
 
-			Liste uniquement les allergènes possibles parmi : gluten, lait, oeufs, fruits à coque, soja, poisson, crustacés, arachides.
+Liste uniquement les allergènes possibles parmi : gluten, lait, oeufs, fruits à coque, soja, poisson, crustacés, arachides.
 
-			Réponse format JSON : {"allergens": [...]}.
+Réponse format JSON : {"allergens": [...]}.
 
-			⚠️ Important : si aucun allergène n'est présent dans le produit, renvoie {"allergens": []} (un tableau vide) au lieu de null ou de texte.
-		`, req.Name)
+⚠️ Important : si aucun allergène n'est présent, renvoie [].
+		`, fmt.Sprintf("%s %d %s", req.Name, req.Quantity, req.Unity))
+
+	prompt2 := fmt.Sprintf(`
+Tu es un assistant qui fournit les valeurs nutritionnelles d'un aliment.
+
+Item: "%s"
+
+Réponse format JSON :
+{
+"Kcal": 0,
+"Protein": 0,
+"Fat": 0,
+"Carbohydrate": 0,
+"Fiber": 0,
+"Sugar": 0,
+"Salt": 0
+}
+
+⚠️ Important : 
+- Si une valeur nutritionnelle est inconnue, renvoie 0.
+- Donne les valeurs pour la quantité donnée, arrondies si nécessaire.
+- Ne renvoie aucun commentaire, juste le JSON.
+		`, fmt.Sprintf("%s %d %s", req.Name, req.Quantity, req.Unity))
 	// Appel avec affichage du stream
 	response, err := client.Prompt(
 		ctx,
 		"mistral:instruct",
-		prompt,
+		prompt2,
 		*s.logger,
 	)
 
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
-	var result struct {
-		Allergens []string `json:"allergens"`
+	var result2 struct {
+		Nutrition struct {
+			Kcal         int `json:"Kcal"`
+			Protein      int `json:"Protein"`
+			Fat          int `json:"Fat"`
+			Carbohydrate int `json:"Carbohydrate"`
+			Fiber        int `json:"Fiber"`
+			Sugar        int `json:"Sugar"`
+			Salt         int `json:"Salt"`
+		} `json:"nutrition"`
 	}
-	if err = json.Unmarshal([]byte(response), &result); err != nil {
+	if err := json.Unmarshal([]byte(response), &result2); err != nil {
 		return fmt.Errorf("erreur parsing JSON Mistral: %w", err)
 	}
 
 	var (
 		allergenRepo    = s.repositoryManager.GetAllergenRepo()
 		itemAlergenRepo = s.repositoryManager.GetitemAllergenRelationRepo()
+		itemRepo        = s.repositoryManager.GetItemRepo()
 	)
 
+	// Création de l'item
+	res, err := itemRepo.Create(
+		ctx,
+		req.Name,                       // nom de l'aliment
+		req.Unity,                      // unité
+		req.Quantity,                   // quantité
+		result2.Nutrition.Kcal,         // kcal
+		result2.Nutrition.Protein,      // protein
+		result2.Nutrition.Fat,          // fat
+		result2.Nutrition.Carbohydrate, // carbohydrate
+		result2.Nutrition.Fiber,        // fiber
+		result2.Nutrition.Sugar,        // sugar
+		result2.Nutrition.Salt,         // salt
+		&req.ExpDate,                   // date d'expiration
+	)
+	if err != nil {
+		return err
+	}
+	itemID, _ := res.LastInsertId()
+
+	var result1 struct {
+		Allergens []string `json:"allergens"`
+	}
+	// Appel avec affichage du stream
+	response, err = client.Prompt(
+		ctx,
+		"mistral:instruct",
+		prompt1,
+		*s.logger,
+	)
+	if err := json.Unmarshal([]byte(response), &result1); err != nil {
+		return fmt.Errorf("erreur parsing JSON Mistral: %w", err)
+	}
 	// Lien avec les alergènes
-	for _, allergenName := range result.Allergens {
+	for _, allergenName := range result1.Allergens {
 		allergenID := allergenRepo.FindByName(ctx, allergenName)
 		if allergenID != -1 {
 			// Ajouter lien item_allergens
