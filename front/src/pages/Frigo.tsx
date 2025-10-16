@@ -1,55 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Info } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-type FoodItem = {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  expiryDate?: string;
-  allergens?: string[];
-  macros?: {
-    energy_kcal: number;
-    protein_g: number;
-    fat_g: number;
-    carbohydrate_g: number;
-    fiber_g: number;
-    sugar_g: number;
-    salt_g: number;
-  };
+import { FoodItem } from "@/types/FoodItem";
+import { getFoodItems, addFoodItem, deleteFoodItem } from "@/services/fridgeService";
+
+const allergenColors: Record<string, string> = {
+  gluten: "bg-allergen-gluten",
+  lactose: "bg-allergen-dairy",
+  noix: "bg-allergen-nuts",
+  soja: "bg-allergen-soy",
+  oeuf: "bg-allergen-egg",
 };
 
 const Frigo = () => {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [newItem, setNewItem] = useState({
-    name: "",
-    quantity: "",
-    unit: "g",
-    expiryDate: "",
-  });
+  const [newItem, setNewItem] = useState({ name: "", quantity: "", unit: "g", expiryDate: "" });
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
   const [showMacrosDialog, setShowMacrosDialog] = useState(false);
 
-  const allergenColors: Record<string, string> = {
-    gluten: "bg-allergen-gluten",
-    lactose: "bg-allergen-dairy",
-    noix: "bg-allergen-nuts",
-    soja: "bg-allergen-soy",
-    oeuf: "bg-allergen-egg",
-  };
+  // Charger les aliments depuis le localStorage
+  useEffect(() => {
+    setFoodItems(getFoodItems());
+  }, []);
 
+  // Ajouter un aliment
   const handleAddItem = () => {
     if (!newItem.name || !newItem.quantity) {
       toast.error("Veuillez remplir tous les champs obligatoires");
@@ -74,17 +54,21 @@ const Frigo = () => {
       },
     };
 
-    setFoodItems([...foodItems, item]);
+    const updated = addFoodItem(item);
+    setFoodItems(updated);
     setNewItem({ name: "", quantity: "", unit: "g", expiryDate: "" });
     toast.success(`${item.name} ajouté au frigo !`);
   };
 
+  // Supprimer un aliment
   const handleDeleteItem = (id: string) => {
     const item = foodItems.find((i) => i.id === id);
-    setFoodItems(foodItems.filter((item) => item.id !== id));
+    const updated = deleteFoodItem(id);
+    setFoodItems(updated);
     toast.success(`${item?.name} retiré du frigo`);
   };
 
+  // Afficher le détail
   const handleShowMacros = (item: FoodItem) => {
     setSelectedItem(item);
     setShowMacrosDialog(true);
@@ -93,38 +77,30 @@ const Frigo = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-cream p-8">
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-        <div>
+        <header>
           <h1 className="text-4xl font-bold text-foreground mb-2">Mon Frigo 🧊</h1>
-          <p className="text-muted-foreground">
-            Gérez vos aliments et leurs dates d'expiration
-          </p>
-        </div>
+          <p className="text-muted-foreground">Gérez vos aliments et leurs dates d'expiration</p>
+        </header>
 
-        {/* Formulaire d'ajout */}
+        {/* Formulaire d’ajout */}
         <Card className="p-6 shadow-medium border-2 border-primary/20">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
-            Ajouter un aliment
-          </h2>
+          <h2 className="text-xl font-semibold mb-4">Ajouter un aliment</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <Input
               placeholder="Nom de l'aliment"
               value={newItem.name}
               onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-              className="border-input focus:border-primary"
             />
             <Input
               type="number"
               placeholder="Quantité"
               value={newItem.quantity}
-              onChange={(e) =>
-                setNewItem({ ...newItem, quantity: e.target.value })
-              }
-              className="border-input focus:border-primary"
+              onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
             />
             <select
               value={newItem.unit}
               onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
             >
               <option value="g">g</option>
               <option value="kg">kg</option>
@@ -136,44 +112,28 @@ const Frigo = () => {
               type="date"
               placeholder="Date d'expiration"
               value={newItem.expiryDate}
-              onChange={(e) =>
-                setNewItem({ ...newItem, expiryDate: e.target.value })
-              }
-              className="border-input focus:border-primary"
+              onChange={(e) => setNewItem({ ...newItem, expiryDate: e.target.value })}
             />
-            <Button
-              onClick={handleAddItem}
-              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter
+            <Button onClick={handleAddItem} className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+              <Plus className="w-4 h-4 mr-2" /> Ajouter
             </Button>
           </div>
         </Card>
 
         {/* Liste des aliments */}
-        <div>
-          <h2 className="text-2xl font-bold text-foreground mb-4">
-            Mes aliments ({foodItems.length})
-          </h2>
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Mes aliments ({foodItems.length})</h2>
           {foodItems.length === 0 ? (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground text-lg">
-                Votre frigo est vide ! Ajoutez des aliments ci-dessus.
-              </p>
+            <Card className="p-12 text-center text-muted-foreground">
+              Votre frigo est vide ! Ajoutez des aliments ci-dessus.
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {foodItems.map((item) => (
-                <Card
-                  key={item.id}
-                  className="p-4 hover:shadow-medium transition-all duration-300 border-l-4 border-l-primary animate-slide-in"
-                >
+                <Card key={item.id} className="p-4 border-l-4 border-l-primary hover:shadow-medium transition">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-foreground">
-                        {item.name}
-                      </h3>
+                    <div>
+                      <h3 className="font-semibold text-lg">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {item.quantity} {item.unit}
                       </p>
@@ -184,34 +144,19 @@ const Frigo = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleShowMacros(item)}
-                        className="h-8 w-8 hover:bg-primary/10"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleShowMacros(item)}>
                         <Info className="w-4 h-4 text-primary" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="h-8 w-8 hover:bg-destructive/10"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteItem(item.id)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
                     </div>
                   </div>
-                  {item.allergens && item.allergens.length > 0 && (
+                  {item.allergens && (
                     <div className="flex flex-wrap gap-2">
-                      {item.allergens.map((allergen) => (
-                        <Badge
-                          key={allergen}
-                          className={`${
-                            allergenColors[allergen] || "bg-muted"
-                          } text-white text-xs`}
-                        >
-                          {allergen}
+                      {item.allergens.map((a) => (
+                        <Badge key={a} className={`${allergenColors[a] || "bg-muted"} text-white text-xs`}>
+                          {a}
                         </Badge>
                       ))}
                     </div>
@@ -220,19 +165,15 @@ const Frigo = () => {
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
 
-      {/* Dialog Macronutriments */}
+      {/* Détails nutritionnels */}
       <Dialog open={showMacrosDialog} onOpenChange={setShowMacrosDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-primary">
-              {selectedItem?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Valeurs nutritionnelles pour 100g
-            </DialogDescription>
+            <DialogTitle className="text-2xl text-primary">{selectedItem?.name}</DialogTitle>
+            <DialogDescription>Valeurs nutritionnelles pour 100g</DialogDescription>
           </DialogHeader>
           {selectedItem?.macros && (
             <div className="space-y-3">
@@ -247,13 +188,8 @@ const Frigo = () => {
                   salt_g: "Sel (g)",
                 };
                 return (
-                  <div
-                    key={key}
-                    className="flex justify-between items-center p-3 bg-orange-soft rounded-lg"
-                  >
-                    <span className="font-medium text-foreground">
-                      {labels[key]}
-                    </span>
+                  <div key={key} className="flex justify-between items-center p-3 bg-orange-soft rounded-lg">
+                    <span>{labels[key]}</span>
                     <span className="font-bold text-primary">{value}</span>
                   </div>
                 );
