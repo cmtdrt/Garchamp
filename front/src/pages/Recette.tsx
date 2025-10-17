@@ -89,7 +89,7 @@ const Recette = () => {
         if (stored) {
           const parsed = JSON.parse(stored) as StoredFoodItem[];
           items = parsed.map((i) => ({
-            id: i.id,
+            id: Number(i.id),
             name: i.name,
             quantity: typeof i.quantity === "string" ? Number(i.quantity) || 0 : i.quantity,
             unit: i.unit || "unité",
@@ -101,7 +101,7 @@ const Recette = () => {
       const payload = {
         items,
         people_number: Number(numberOfPeople) || 1,
-        allergens: selectedAllergens,
+        allergens: selectedAllergens.map((a) => a.toLowerCase()),
       };
 
       const res = await askRecipe(payload);
