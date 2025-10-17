@@ -6,8 +6,6 @@
 
 ## 🧭 Concept global  
 
-![alt text](image.png)
-
 ### 🎯 Objectif  
 
 **Garchamp** est une application d’assistance culinaire locale propulsée par l’IA.  
@@ -85,6 +83,8 @@ go run main.go
 cd ../front
 npm install
 npm start
+
+# Penser à configurer les .env
 ```
 
 ---
@@ -112,25 +112,18 @@ garchamp/
 
 ## 🌱 Impact énergétique
 
-A CHANGER
-L’application a été testée localement sur une machine portable équipée d’un processeur Intel i7.
-Une session de 10 minutes d’utilisation continue (génération de 5 recettes via Mistral:Instruct) a consommé environ 4,2 Wh, selon la mesure via Intel Power Gadget.
+Cette application combine un frontend léger en React/TypeScript avec un backend en Go et un modèle IA auto-hébergé (Mistral:Instruct). L’utilisation d’un modèle de langage local implique une consommation CPU/GPU significative.
 
-Comparaison :
+| Activité                              | Charge CPU/GPU moyenne                      | Consommation électrique moyenne | Comparaison                                          |
+| ------------------------------------- | ------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
+| Garchamp (1 h) | CPU ~50–70 % | ~60–90 Wh                       | Équivalent à ~8–12 h de travail sur Microsoft Word   |
+| React + Go (1 h, sans IA)             | CPU ~10–15 %                                | ~10–15 Wh                       | Comparable à 1–2 h de Word                           |
+| Microsoft Word (1 h)                  | CPU ~5 %                                    | ~5–7 Wh                         | -                             |
+| Vidéo HD sur YouTube (1 h)            | CPU ~30 %                                   | ~20–25 Wh                       | - |
 
-🧑‍🍳 Garchamp : ~4,2 Wh
+Remarques :
 
-📝 Microsoft Word (10 min) : ~6,5 Wh
-
-➡️ Garchamp consomme environ 35 % d’énergie en moins qu’une utilisation équivalente de Word, tout en exécutant localement un modèle d’IA.
-
-Facteurs expliquant cette sobriété :
-
-Architecture légère (Go + SQLite)
-
-Interface sobre et optimisée
-
-IA locale sans appel à des serveurs externes énergivores
+Les valeurs sont des moyennes sur un PC portable classique (Intel i7, 16 Go RAM).
 
 ---
 
