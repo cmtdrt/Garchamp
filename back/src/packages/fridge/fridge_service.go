@@ -164,6 +164,7 @@ func (s *service) getAll(ctx context.Context) ([]Item, error) {
 		item = newItem(i.ID, i.Quantity, i.Name, i.Unit, i.ExpDate, allergensName)
 		result = append(result, *item)
 	}
+	fmt.Println("resultat du getAll", result)
 	return result, nil
 }
 

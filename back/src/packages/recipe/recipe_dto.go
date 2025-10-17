@@ -4,7 +4,6 @@ import (
 	"api/src/core/utils"
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -18,9 +17,7 @@ type createReq struct {
 
 func (cr *createReq) Bind(_ *http.Request) error {
 	v := validator.New()
-
 	if err := v.Struct(cr); err != nil {
-		fmt.Println("error", err)
 		return errors.New("structure de requête invalide")
 	}
 	return nil
