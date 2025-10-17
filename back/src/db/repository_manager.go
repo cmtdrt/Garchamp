@@ -2,6 +2,7 @@ package db
 
 import (
 	"api/src/core/base"
+	allergendb "api/src/db/allergen"
 	itemdb "api/src/db/item"
 	itemallergenrelationdb "api/src/db/item_allergen_relation"
 )
@@ -11,17 +12,20 @@ type RepositoryManager struct {
 	dbMain                         *base.DatabaseManager
 	itemRepository                 *itemdb.Repository
 	itemAllergenRelationRepository *itemallergenrelationdb.Repository
+	allergenRepository             *allergendb.Repository
 }
 
 func NewRepositoryManager(
 	dbMain *base.DatabaseManager,
 	itemRepository *itemdb.Repository,
 	itemAllergenRelationRepository *itemallergenrelationdb.Repository,
+	allergenRepository *allergendb.Repository,
 ) *RepositoryManager {
 	return &RepositoryManager{
 		dbMain:                         dbMain,
 		itemAllergenRelationRepository: itemAllergenRelationRepository,
 		itemRepository:                 itemRepository,
+		allergenRepository:             allergenRepository,
 	}
 }
 
@@ -30,6 +34,7 @@ func InitRepositories(dbMain *base.DatabaseManager, logger *base.Logger) *Reposi
 		dbMain,
 		itemdb.NewRepository(dbMain, logger),
 		itemallergenrelationdb.NewRepository(dbMain, logger),
+		allergendb.NewRepository(dbMain, logger),
 	)
 }
 
@@ -47,6 +52,14 @@ func (rm *RepositoryManager) GetitemAllergenRelationRepo() *itemallergenrelation
 		rm.logger.Error("itemAllergenRelationRepository non initialisé")
 	}
 	return rm.itemAllergenRelationRepository
+}
+
+// GetAllergenRepo permet l'accès à allergenRepository.
+func (rm *RepositoryManager) GetAllergenRepo() *allergendb.Repository {
+	if rm.allergenRepository == nil {
+		rm.logger.Error("allergenRepository non initialisé")
+	}
+	return rm.allergenRepository
 }
 
 // GetDBMain permet l'accès au db manager de la base de données utilisateur.

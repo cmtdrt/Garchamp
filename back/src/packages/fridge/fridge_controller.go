@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
@@ -56,6 +57,75 @@ func (c *controller) create(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		response.ErrServer(base.ErrServerText),
+		controllerReference,
+		c.logger,
+	)
+}
+
+func (c *controller) getAll(w http.ResponseWriter, r *http.Request) {
+	items, err := c.service.getAll(r.Context())
+
+	if err != nil {
+		response.RenderAndLog(r.Context(), w, r, response.ErrServer(err), "fridge-getall", c.logger)
+		return
+	}
+
+	response.RenderAndLog(
+		r.Context(),
+		w,
+		r,
+		response.NewSuccessResponse(items, "Fetched successfully"),
+		"fridge-getAll",
+		c.logger,
+	)
+}
+
+func (c *controller) delete(w http.ResponseWriter, r *http.Request) {
+	const controllerReference = "fridge-delete"
+	itemID := chi.URLParam(r, "itemID")
+
+	err := c.service.deleteItemByID(r.Context(), itemID)
+	if err != nil {
+		response.RenderAndLog(r.Context(),
+			w,
+			r,
+			response.ErrServer(base.ErrServerText),
+			controllerReference,
+			c.logger,
+		)
+		return
+	}
+	response.RenderAndLog(
+		r.Context(),
+		w,
+		r,
+		response.NewSuccessCreatedResponse(nil, "Deleted successfully"),
+		controllerReference,
+		c.logger,
+	)
+}
+
+func (c *controller) get(w http.ResponseWriter, r *http.Request) {
+	const controllerReference = "fridge-get"
+	itemID := chi.URLParam(r, "itemID")
+
+	rslt, err := c.service.getItemMacroByID(r.Context(), itemID)
+	if err != nil {
+		response.RenderAndLog(
+			r.Context(),
+			w,
+			r,
+			response.ErrServer(base.ErrServerText),
+			controllerReference,
+			c.logger,
+		)
+		return
+	}
+	response.RenderAndLog(
+		r.Context(),
+		w,
+		r,
+		response.NewSuccessResponse(rslt, "Fetched successfully"),
 		controllerReference,
 		c.logger,
 	)
