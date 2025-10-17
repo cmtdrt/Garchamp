@@ -68,7 +68,6 @@ const Frigo = () => {
     const fetchData = async () => {
       try {
         const items = await fridgeService.getAll();
-        console.log(items);
         setFoodItems(items);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       } catch (err) {

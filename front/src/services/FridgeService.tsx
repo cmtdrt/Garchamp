@@ -42,7 +42,6 @@ export const fridgeService = {
 
 
   async add(item: FoodItem): Promise<Response> {
-    console.log("add", item);
     type PostBody = {
       name: string;
       quantity: number;

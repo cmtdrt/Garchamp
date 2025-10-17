@@ -36,7 +36,6 @@ export type RecipeResponse = {
 };
 
 export async function askRecipe(payload: RecipeRequest): Promise<RecipeResponse> {
-  console.log("askRecipe", payload);
   try {
     const response = await fetch("http://localhost:8080/api/v1/recipe/", {
       method: "POST",
