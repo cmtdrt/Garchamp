@@ -68,7 +68,7 @@ const Frigo = () => {
     const fetchData = async () => {
       try {
         const items = await fridgeService.getAll();
-        console.log("Réponse API :", items);
+        console.log(items);
         setFoodItems(items);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       } catch (err) {
@@ -96,32 +96,29 @@ const Frigo = () => {
     const item: FoodItem = {
       name: newItem.name,
       quantity: parseInt(newItem.quantity),
-      unit: newItem.unity,
-      expiration_date: newItem.expiryDate || null,
+      unity: newItem.unity,
+      exp_date: newItem.expiryDate || null,
     };
 
     try {
-      console.log(item)
-    const res = await fridgeService.add(item);
-    console.log(res);
-    if (!res.ok || (res.status !== 200 && res.status !== 201)) throw new Error("Erreur lors de l’ajout");
-    // Mise à jour du localStorage / state avec la réponse de l'API
-    else {
-      const updatedItems = [...foodItems, item];
-      setFoodItems(updatedItems);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
-      toast.success(`${item.name} ajouté au frigo !`);
-    }
-    console.log("Réponse API :", res);
-  } catch {
-    // Si API non dispo, on ajoute localement avec un ID temporaire
-    const localItem = { ...item, id: Date.now().toString() };
-    const updatedItems = [...foodItems, localItem];
-    setFoodItems(updatedItems);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
-    toast.warning("Ajouté localement (API non disponible)");
-  }
+      const res = await fridgeService.add(item);
+      if (!res.ok || (res.status !== 200 && res.status !== 201)) {
+        throw new Error("Erreur lors de l’ajout");
+      }
 
+      // Récupère tous les items une seule fois après ajout
+      const items = await fridgeService.getAll();
+      setFoodItems(items);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      toast.success(`${item.name} ajouté au frigo !`);
+    } catch (err) {
+      const items = await fridgeService.getAll();
+      setFoodItems(items);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      toast.error(`${item.name} ajouté au frigo`);
+    }
+
+    // Réinitialisation des champs
     setNewItem({ name: "", quantity: "", unity: "g", expiryDate: "" });
   };
 
@@ -228,9 +225,9 @@ const Frigo = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">{item.quantity} {item.y}</p>
-                      {item.expiration_date && (
+                      {item.exp_date && (
                         <p className="text-xs text-destructive mt-1">
-                          Expire le {new Date(item.expiration_date).toLocaleDateString()}
+                          Expire le {new Date(item.exp_date).toLocaleDateString()}
                         </p>
                       )}
                     </div>

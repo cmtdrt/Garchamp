@@ -2,7 +2,7 @@ export type FoodItem = {
   name: string;
   quantity: number;
   unit: string;
-  expiration_date?: string;
+  exp_date?: string;
   allergens?: string[];
   macros?: {
     energy_kcal: number;
