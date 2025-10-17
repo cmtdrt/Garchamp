@@ -62,8 +62,8 @@ const Frigo = () => {
 
   // Charger depuis localStorage puis API
   useEffect(() => {
-    const localData = localStorage.getItem(STORAGE_KEY);
-    if (localData) setFoodItems(JSON.parse(localData));
+//    const localData = localStorage.getItem(STORAGE_KEY);
+//    if (localData) setFoodItems(JSON.parse(localData));
 
     const fetchData = async () => {
       try {
@@ -96,12 +96,14 @@ const Frigo = () => {
     const item: FoodItem = {
       name: newItem.name,
       quantity: parseInt(newItem.quantity),
-      unity: newItem.unity,
+      unit: newItem.unity,
       expiration_date: newItem.expiryDate || null,
     };
 
     try {
+      console.log(item)
     const res = await fridgeService.add(item);
+    console.log(res);
     if (!res.ok || (res.status !== 200 && res.status !== 201)) throw new Error("Erreur lors de l’ajout");
     // Mise à jour du localStorage / state avec la réponse de l'API
     else {

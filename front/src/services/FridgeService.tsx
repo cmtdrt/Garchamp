@@ -6,9 +6,28 @@ const API_URL = "http://localhost:5173/api/v1/fridge";
 export const fridgeService = {
   async getAll(): Promise<FoodItem[]> {
     const res = await fetch(API_URL);
-    if (!res.ok) throw new Error("Erreur lors du chargement");
-    return res.json();
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Erreur API :", res.status, text);
+      throw new Error(`Erreur API ${res.status}`);
+    }
+
+    try {
+      const data = await res.json();
+
+      if (data && Array.isArray(data.data)) {
+        return data.data; 
+      }
+
+      console.error("Structure inattendue :", data);
+      return [];
+    } catch (err) {
+      console.error("Erreur de parsing JSON :", err);
+      return [];
+    }
   },
+
 
   async add(item: FoodItem): Promise<Response> {
     const res = await fetch(API_URL, {

@@ -9,6 +9,7 @@ import (
 	"api/src/core/base"
 	"api/src/db"
 	"api/src/packages/fridge"
+	"api/src/packages/recipe"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -22,7 +23,7 @@ func SetupRouter(
 	repositoryManager *db.RepositoryManager,
 	logger *base.Logger,
 ) chi.Router {
-	const maxReqDuration = 120 * time.Second
+	const maxReqDuration = 300 * time.Second
 	r := chi.NewRouter()
 	r.Use(cors.Handler(*corsOptions)) // Gestion des CORS policy
 	r.Use(
@@ -49,6 +50,7 @@ func SetupRouter(
 			}
 		})
 		r.Mount("/fridge", fridge.Route(repositoryManager, logger))
+		r.Mount("/recipe", recipe.Route(repositoryManager, logger))
 	})
 
 	return r
