@@ -12,25 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-// Types
-export type FoodItem = {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  expiryDate?: string;
-  allergens?: string[];
-  macros?: {
-    energy_kcal: number;
-    protein_g: number;
-    fat_g: number;
-    carbohydrate_g: number;
-    fiber_g: number;
-    sugar_g: number;
-    salt_g: number;
-  };
-};
+import { fridgeService } from "@/services/FridgeService";
+import { FoodItem } from "@/types/FoodItem";
 
 // Couleurs pour tous les allergènes
 const allergenColors: Record<string, string> = {
@@ -67,73 +50,101 @@ const Frigo = () => {
   const [newItem, setNewItem] = useState({
     name: "",
     quantity: "",
-    unit: "g",
+    unity: "g",
     expiryDate: "",
   });
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
   const [showMacrosDialog, setShowMacrosDialog] = useState(false);
   const [temperature, setTemperature] = useState(6); // Température initiale
   const criticalTemp = 6.5; // Seuil critique
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Charger depuis localStorage au montage
+  // Charger depuis localStorage puis API
   useEffect(() => {
     const localData = localStorage.getItem(STORAGE_KEY);
     if (localData) setFoodItems(JSON.parse(localData));
+
+    const fetchData = async () => {
+      try {
+        const items = await fridgeService.getAll();
+        console.log("Réponse API :", items);
+        setFoodItems(items);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (err) {
+        console.log("Impossible de charger l'api")
+        toast.error("Impossible de charger les aliments depuis l’API 😢");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  // Sauvegarder automatiquement dans localStorage
   const updateLocalStorage = (items: FoodItem[]) => {
     setFoodItems(items);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   };
 
-  // Ajouter un aliment
-  const handleAddItem = () => {
+  // ➕ Ajouter un aliment
+  const handleAddItem = async () => {
     if (!newItem.name || !newItem.quantity) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
     const item: FoodItem = {
-      id: Date.now().toString(),
       name: newItem.name,
-      quantity: parseFloat(newItem.quantity),
-      unit: newItem.unit,
-      expiryDate: newItem.expiryDate || undefined,
-      allergens: ["Gluten"], // Exemple par défaut
-      macros: {
-        energy_kcal: 250,
-        protein_g: 5,
-        fat_g: 3,
-        carbohydrate_g: 45,
-        fiber_g: 2,
-        sugar_g: 8,
-        salt_g: 0.5,
-      },
+      quantity: parseInt(newItem.quantity),
+      unity: newItem.unity,
+      expiration_date: newItem.expiryDate || null,
     };
 
-    updateLocalStorage([...foodItems, item]);
-    setNewItem({ name: "", quantity: "", unit: "g", expiryDate: "" });
-    toast.success(`${item.name} ajouté au frigo !`);
+    try {
+    const res = await fridgeService.add(item);
+    if (!res.ok || (res.status !== 200 && res.status !== 201)) throw new Error("Erreur lors de l’ajout");
+    // Mise à jour du localStorage / state avec la réponse de l'API
+    else {
+      const updatedItems = [...foodItems, item];
+      setFoodItems(updatedItems);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
+      toast.success(`${item.name} ajouté au frigo !`);
+    }
+    console.log("Réponse API :", res);
+  } catch {
+    // Si API non dispo, on ajoute localement avec un ID temporaire
+    const localItem = { ...item, id: Date.now().toString() };
+    const updatedItems = [...foodItems, localItem];
+    setFoodItems(updatedItems);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
+    toast.warning("Ajouté localement (API non disponible)");
+  }
+
+    setNewItem({ name: "", quantity: "", unity: "g", expiryDate: "" });
   };
 
-  // Supprimer un aliment
-  const handleDeleteItem = (id: string) => {
+  // 🗑️ Supprimer un aliment
+  const handleDeleteItem = async (id: string) => {
     const updated = foodItems.filter((item) => item.id !== id);
     updateLocalStorage(updated);
-    toast.success("Aliment supprimé ✅");
+
+    try {
+      await fridgeService.remove(id);
+      toast.success("Aliment supprimé ✅");
+    } catch {
+      toast.warning("Suppression locale (API non disponible)");
+    }
   };
 
-  // Afficher les macros
+  // 📊 Voir les macros
   const handleShowMacros = (item: FoodItem) => {
     setSelectedItem(item);
     setShowMacrosDialog(true);
   };
 
-
+  // Simulation température
   useEffect(() => {
-    intervalRef.current = window.setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setTemperature((prev) => {
         const next = prev + 0.01;
         if (next >= criticalTemp) beep();
@@ -142,10 +153,9 @@ const Frigo = () => {
     }, 1000);
 
     return () => {
-      if (intervalRef.current) window.clearInterval(intervalRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-cream p-8">
@@ -176,8 +186,8 @@ const Frigo = () => {
               onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
             />
             <select
-              value={newItem.unit}
-              onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+              value={newItem.unity}
+              onChange={(e) => setNewItem({ ...newItem, unity: e.target.value })}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="g">g</option>
@@ -202,7 +212,9 @@ const Frigo = () => {
           <h2 className="text-2xl font-bold mb-4">
             Mes aliments ({foodItems.length})
           </h2>
-          {foodItems.length === 0 ? (
+          {loading ? (
+            <Card className="p-12 text-center">Chargement...</Card>
+          ) : foodItems.length === 0 ? (
             <Card className="p-12 text-center text-muted-foreground">
               Votre frigo est vide !
             </Card>
@@ -213,10 +225,10 @@ const Frigo = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">{item.quantity} {item.unit}</p>
-                      {item.expiryDate && (
+                      <p className="text-sm text-muted-foreground">{item.quantity} {item.y}</p>
+                      {item.expiration_date && (
                         <p className="text-xs text-destructive mt-1">
-                          Expire le {new Date(item.expiryDate).toLocaleDateString()}
+                          Expire le {new Date(item.expiration_date).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -254,23 +266,12 @@ const Frigo = () => {
           </DialogHeader>
           {selectedItem?.macros && (
             <div className="space-y-3">
-              {Object.entries(selectedItem.macros).map(([key, value]) => {
-                const labels: Record<string, string> = {
-                  energy_kcal: "Énergie (kcal)",
-                  protein_g: "Protéines (g)",
-                  fat_g: "Lipides (g)",
-                  carbohydrate_g: "Glucides (g)",
-                  fiber_g: "Fibres (g)",
-                  sugar_g: "Sucres (g)",
-                  salt_g: "Sel (g)",
-                };
-                return (
-                  <div key={key} className="flex justify-between items-center p-3 bg-orange-soft rounded-lg">
-                    <span className="font-medium">{labels[key]}</span>
-                    <span className="font-bold text-primary">{value}</span>
-                  </div>
-                );
-              })}
+              {Object.entries(selectedItem.macros).map(([key, value]) => (
+                <div key={key} className="flex justify-between items-center p-3 bg-orange-soft rounded-lg">
+                  <span className="capitalize">{key.replace("_", " ")}</span>
+                  <span className="font-bold text-primary">{value}</span>
+                </div>
+              ))}
             </div>
           )}
         </DialogContent>
