@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
 type Repository struct {
@@ -17,8 +16,13 @@ func NewRepository(db *base.DatabaseManager, logger *base.Logger) *Repository {
 	return &Repository{DBManager: db, Logger: logger}
 }
 
-func (r *Repository) Create(ctx context.Context, name, unit string, quantity int, kcal, protein, fat, carbohydrate, fiber, sugar, salt float64, expDate *string) (sql.Result, error) {
-	fmt.Println(quantity, kcal, protein, fat, carbohydrate, fiber, sugar, salt)
+func (r *Repository) Create(
+	ctx context.Context,
+	name, unit string,
+	quantity int,
+	kcal, protein, fat, carbohydrate, fiber, sugar, salt float64,
+	expDate *string,
+) (sql.Result, error) {
 	query := `
 	INSERT INTO items (name, unit, quantity, expiration_date, energy_kcal, protein_g, fat_g, carbohydrate_g, fiber_g, sugar_g, salt_g ) VALUES (?,?,?,?,?,?,?,?,?,?,?);;
 	`
@@ -66,6 +70,9 @@ func (r *Repository) GetAll(ctx context.Context) ([]ItemLite, error) {
 			return nil, errors.New("error")
 		}
 		items = append(items, *NewItemLite(id, name, unit, quantity, expDate))
+	}
+	if rslt.Err() != nil {
+		return nil, errors.New("erreur")
 	}
 	return items, nil
 }
@@ -118,7 +125,10 @@ func (r *Repository) GetByID(ctx context.Context, itemID string) (*Model, error)
 
 		item = NewModel(id, name, unit, quantity, kcal, protein, fat, carbohydrate, fiber, sugar, salt, expDate)
 		return item, nil
-
 	}
-	return nil, nil
+
+	if rslt.Err() != nil {
+		return nil, errors.New("erreur")
+	}
+	return nil, errors.New("no item find")
 }
