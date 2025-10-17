@@ -11,7 +11,7 @@ func Route(repositoryManager *db.RepositoryManager, logger *base.Logger) chi.Rou
 	r := chi.NewRouter()
 	groupController := newController(repositoryManager, logger)
 	r.Get("/", groupController.getAll)
-	// r.Get("/{itemID}", groupController.get)
+	r.Get("/{itemID}", groupController.get)
 	r.Delete("/{itemID}", groupController.delete)
 	r.Post("/", groupController.create)
 	return r

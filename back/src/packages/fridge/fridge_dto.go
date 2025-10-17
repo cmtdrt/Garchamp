@@ -43,3 +43,30 @@ func newItem(id, quantity int, name, unit string, expDate sql.NullString, allerg
 		Allergens: allergens,
 	}
 }
+
+type itemDetails struct {
+	Kcal         int `json:"kcal"`
+	Protein      int `json:"protein"`
+	Fat          int `json:"fat"`
+	Carbohydrate int `json:"carbohydrate"`
+	Fiber        int `json:"siber"`
+	Sugar        int `json:"sugar"`
+	Salt         int `json:"salt"`
+}
+
+func newItemDetails(kcal,
+	protein,
+	fat,
+	carbohydrate,
+	fiber,
+	sugar,
+	salt int) *itemDetails {
+	return &itemDetails{
+		Kcal:         kcal,
+		Fat:          fat,
+		Carbohydrate: carbohydrate,
+		Fiber:        fiber,
+		Sugar:        sugar,
+		Salt:         salt,
+	}
+}

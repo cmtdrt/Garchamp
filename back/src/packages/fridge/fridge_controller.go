@@ -104,3 +104,29 @@ func (c *controller) delete(w http.ResponseWriter, r *http.Request) {
 		c.logger,
 	)
 }
+
+func (c *controller) get(w http.ResponseWriter, r *http.Request) {
+	const controllerReference = "fridge-get"
+	itemID := chi.URLParam(r, "itemID")
+
+	rslt, err := c.service.getItemMacroByID(r.Context(), itemID)
+	if err != nil {
+		response.RenderAndLog(
+			r.Context(),
+			w,
+			r,
+			response.ErrServer(base.ErrServerText),
+			controllerReference,
+			c.logger,
+		)
+		return
+	}
+	response.RenderAndLog(
+		r.Context(),
+		w,
+		r,
+		response.NewSuccessResponse(rslt, "Fetched successfully"),
+		controllerReference,
+		c.logger,
+	)
+}

@@ -3,7 +3,7 @@ package allergendb
 import (
 	"api/src/core/base"
 	"context"
-	"fmt"
+	"errors"
 )
 
 type Repository struct {
@@ -39,7 +39,7 @@ func (r *Repository) GetAllAllergensByRelation(ctx context.Context, itemID int) 
 	rslt, err := r.DBManager.DB.QueryContext(ctx, query, itemID)
 
 	if err != nil {
-		return nil, fmt.Errorf("error")
+		return nil, errors.New("error")
 	}
 	defer rslt.Close()
 
@@ -50,7 +50,7 @@ func (r *Repository) GetAllAllergensByRelation(ctx context.Context, itemID int) 
 	for rslt.Next() {
 		err = rslt.Scan(&name)
 		if err != nil {
-			return nil, fmt.Errorf("error")
+			return nil, errors.New("error")
 		}
 		names = append(names, name)
 	}
