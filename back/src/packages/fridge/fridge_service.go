@@ -68,7 +68,6 @@ Réponse format JSON :
 	)
 
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -81,7 +80,7 @@ Réponse format JSON :
 		Sugar        float64 `json:"Sugar"`
 		Salt         float64 `json:"Salt"`
 	}
-	if err := json.Unmarshal([]byte(response), &result2); err != nil {
+	if err = json.Unmarshal([]byte(response), &result2); err != nil {
 		return fmt.Errorf("erreur parsing JSON Mistral: %w", err)
 	}
 
@@ -90,7 +89,6 @@ Réponse format JSON :
 		itemAlergenRepo = s.repositoryManager.GetitemAllergenRelationRepo()
 		itemRepo        = s.repositoryManager.GetItemRepo()
 	)
-	fmt.Println(result2)
 
 	// Création de l'item
 	res, err := itemRepo.Create(
@@ -122,7 +120,10 @@ Réponse format JSON :
 		prompt1,
 		*s.logger,
 	)
-	if err := json.Unmarshal([]byte(response), &result1); err != nil {
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal([]byte(response), &result1); err != nil {
 		return fmt.Errorf("erreur parsing JSON Mistral: %w", err)
 	}
 	// Lien avec les alergènes

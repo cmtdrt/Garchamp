@@ -20,7 +20,7 @@ type Model struct {
 	Salt         int
 }
 
-func NewModel(id int, name, unit string, quantity, Kcal,
+func NewModel(id int, name, unit string, quantity, kcal,
 	protein,
 	fat,
 	carbohydrate,
@@ -32,6 +32,7 @@ func NewModel(id int, name, unit string, quantity, Kcal,
 		Name:         name,
 		Unit:         unit,
 		Quantity:     quantity,
+		Kcal:         kcal,
 		Protein:      protein,
 		Fat:          fat,
 		Carbohydrate: carbohydrate,
