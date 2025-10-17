@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Users, Check } from "lucide-react";
-import { askRecipe, type Item } from "@/services/recipe.service";
+import { askRecipe, type Item, type RecipeResponse } from "@/services/recipe.service";
+import ChatResponse from "@/components/ChatResponse";
 import { toast } from "sonner";
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  recipeResponse?: RecipeResponse;
 };
 
 const Recette = () => {
@@ -103,15 +105,20 @@ const Recette = () => {
       };
 
       const res = await askRecipe(payload);
-
-      const aiText = res.reponse;
+      const aiText = ""; // rendu via composant structuré par message
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: aiText,
+        recipeResponse: res,
       };
-      setMessages((prev) => [...prev, aiMessage]);
+      const bonAppetitMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        role: "assistant",
+        content: "Bon appétit !",
+      };
+      setMessages((prev) => [...prev, aiMessage, bonAppetitMessage]);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Impossible de récupérer la recette";
       toast.error(message);
@@ -152,14 +159,12 @@ const Recette = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-cream p-8">
-      <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)] flex flex-col animate-fade-in">
-        <div className="mb-6">
+      <div className="max-w-4xl mx-auto h-[calc(100vh-2rem)] flex flex-col animate-fade-in">
+        <div className="mb-3">
           <h1 className="text-4xl font-bold text-foreground mb-2">
             Créer une Recette 👨‍🍳
           </h1>
-          <p className="text-muted-foreground">
-            Discutez avec l'IA pour créer des recettes personnalisées
-          </p>
+          {/* sous-titre supprimé pour gagner en hauteur */}
           {/* Dropdown Allergènes */}
           <div className="mt-4">
             <button
@@ -200,10 +205,10 @@ const Recette = () => {
         </div>
 
         {/* Nombre de personnes */}
-        <Card className="p-4 mb-4 shadow-medium border-2 border-primary/20">
-          <div className="flex items-center gap-4">
-            <Users className="w-5 h-5 text-primary" />
-            <label className="font-medium text-foreground">
+        <Card className="p-2 mb-3 shadow-medium border-2 border-primary/20">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            <label className="font-medium text-sm text-foreground">
               Pour combien de personnes ?
             </label>
             <Input
@@ -212,9 +217,9 @@ const Recette = () => {
               max="20"
               value={numberOfPeople}
               onChange={(e) => setNumberOfPeople(e.target.value)}
-              className="w-20 border-input focus:border-primary"
+              className="w-16 border-input focus:border-primary text-sm py-1"
             />
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               {numberOfPeople === "1" ? "personne" : "personnes"}
             </span>
           </div>
@@ -238,7 +243,11 @@ const Recette = () => {
                       : "bg-orange-soft text-foreground border-2 border-primary/20"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  {message.role === "assistant" && message.recipeResponse ? (
+                    <ChatResponse response={message.recipeResponse} />
+                  ) : (
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}
