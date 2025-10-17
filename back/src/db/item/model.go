@@ -6,17 +6,39 @@ import (
 )
 
 type Model struct {
-	Name     string
-	Quantity int
-	Unit     string
-	ExpDate  sql.NullString
+	ID           int
+	Name         string
+	Quantity     int
+	Unit         string
+	ExpDate      sql.NullString
+	Kcal         int
+	Protein      int
+	Fat          int
+	Carbohydrate int
+	Fiber        int
+	Sugar        int
+	Salt         int
 }
 
-func NewModel(name, unit string, quantity int, expDate *string) *Model {
+func NewModel(id int, name, unit string, quantity, kcal,
+	protein,
+	fat,
+	carbohydrate,
+	fiber,
+	sugar,
+	salt int, expDate *string) *Model {
 	return &Model{
-		Name:     name,
-		Unit:     unit,
-		Quantity: quantity,
-		ExpDate:  utils.NullStringValidation(expDate),
+		ID:           id,
+		Name:         name,
+		Unit:         unit,
+		Quantity:     quantity,
+		Kcal:         kcal,
+		Protein:      protein,
+		Fat:          fat,
+		Carbohydrate: carbohydrate,
+		Fiber:        fiber,
+		Sugar:        sugar,
+		Salt:         salt,
+		ExpDate:      utils.NullStringValidation(expDate),
 	}
 }
