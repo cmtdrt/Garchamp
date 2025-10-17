@@ -12,7 +12,7 @@ import (
 type createReq struct {
 	Name     string `json:"name"     validate:"required"`
 	Quantity int    `json:"quantity" validate:"required"`
-	Unity    string `json:"unity"    validate:"required,oneof=g kg ml L unité"`
+	Unity    string `json:"unit"    validate:"required,oneof=g kg ml L unité"`
 	ExpDate  string `json:"exp_date" validate:"omitempty"`
 }
 
