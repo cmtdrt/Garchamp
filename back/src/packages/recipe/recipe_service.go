@@ -41,8 +41,12 @@ type recipeAIResponse struct {
 func (s *service) create(ctx context.Context, req *createReq) (*recipeAIResponse, error) {
 	// Préparation des datas
 	ingredientsList := ""
-	for _, item := range req.Items {
-		ingredientsList += fmt.Sprintf("- %d %s de %s\n", item.Quantity, item.Unit, item.Name)
+	if len(req.Items) == 0 {
+		ingredientsList = "Libre : utilisez les ingrédients que vous souhaitez."
+	} else {
+		for _, item := range req.Items {
+			ingredientsList += fmt.Sprintf("- %d %s de %s\n", item.Quantity, item.Unit, item.Name)
+		}
 	}
 	allergenList := "aucun"
 	if len(req.Allergens) > 0 {
@@ -82,6 +86,7 @@ Allergènes à éviter : %s
 }
 
 ⚠️ Important :
+- il faut répondre en français
 - Si aucune recette sûre (sans allergène) ne peut être faite avec ces ingrédients, renvoie :
   {"error": "Aucune recette possible sans les allergènes indiqués."}
 		`, ingredientsList, req.PeopleNumber, allergenList)
