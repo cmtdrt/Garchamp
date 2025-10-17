@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Refrigerator, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PerfDashboard from "@/components/ui/perf-dashboard";
 
 const Sidebar = () => {
   const location = useLocation();
+
 
   const menuItems = [
     { path: "/", icon: Refrigerator, label: "Mon Frigo" },
@@ -13,9 +15,16 @@ const Sidebar = () => {
   return (
     <aside className="w-64 h-screen bg-card border-r border-border sticky top-0 left-0 flex flex-col">
       <div className="p-6 border-b border-border">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Garchamp
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Garchamp
+          </h1>
+          <img
+            src="/logo.png"
+            alt="Garchamp logo"
+            className="h-12 w-12 object-contain drop-shadow -mt-3"
+          />
+        </div>
         <p className="text-sm text-muted-foreground mt-1">Votre assistant cuisine</p>
       </div>
 
@@ -46,12 +55,8 @@ const Sidebar = () => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="bg-gradient-to-br from-orange-soft to-cream rounded-xl p-4 text-center">
-        <p className="text-sm font-medium text-foreground">
-            🇫🇷 Ma France<br />🍷 Mon pinard<br />🥦  mes recettes
-         </p>
-        </div>
+      <div className="p-4 border-t border-border space-y-3">
+        <PerfDashboard />
       </div>
     </aside>
   );
