@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Refrigerator, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PerfDashboard from "@/components/ui/perf-dashboard";
 
 const Sidebar = () => {
   const location = useLocation();
+
 
   const menuItems = [
     { path: "/", icon: Refrigerator, label: "Mon Frigo" },
@@ -53,12 +55,8 @@ const Sidebar = () => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="bg-gradient-to-br from-orange-soft to-cream rounded-xl p-4 text-center">
-        <p className="text-sm font-medium text-foreground">
-        🇫🇷 Ma France<br />🍷 Mon pinard<br />🥦  mes recettes
-         </p>
-        </div>
+      <div className="p-4 border-t border-border space-y-3">
+        <PerfDashboard />
       </div>
     </aside>
   );
