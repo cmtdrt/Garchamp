@@ -6,6 +6,7 @@ import (
 	"api/src/db"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -72,15 +73,13 @@ Réponse format JSON :
 	}
 
 	var result2 struct {
-		Nutrition struct {
-			Kcal         int `json:"Kcal"`
-			Protein      int `json:"Protein"`
-			Fat          int `json:"Fat"`
-			Carbohydrate int `json:"Carbohydrate"`
-			Fiber        int `json:"Fiber"`
-			Sugar        int `json:"Sugar"`
-			Salt         int `json:"Salt"`
-		} `json:"nutrition"`
+		Kcal         float64 `json:"Kcal"`
+		Protein      float64 `json:"Protein"`
+		Fat          float64 `json:"Fat"`
+		Carbohydrate float64 `json:"Carbohydrate"`
+		Fiber        float64 `json:"Fiber"`
+		Sugar        float64 `json:"Sugar"`
+		Salt         float64 `json:"Salt"`
 	}
 	if err := json.Unmarshal([]byte(response), &result2); err != nil {
 		return fmt.Errorf("erreur parsing JSON Mistral: %w", err)
@@ -91,21 +90,22 @@ Réponse format JSON :
 		itemAlergenRepo = s.repositoryManager.GetitemAllergenRelationRepo()
 		itemRepo        = s.repositoryManager.GetItemRepo()
 	)
+	fmt.Println(result2)
 
 	// Création de l'item
 	res, err := itemRepo.Create(
 		ctx,
-		req.Name,                       // nom de l'aliment
-		req.Unity,                      // unité
-		req.Quantity,                   // quantité
-		result2.Nutrition.Kcal,         // kcal
-		result2.Nutrition.Protein,      // protein
-		result2.Nutrition.Fat,          // fat
-		result2.Nutrition.Carbohydrate, // carbohydrate
-		result2.Nutrition.Fiber,        // fiber
-		result2.Nutrition.Sugar,        // sugar
-		result2.Nutrition.Salt,         // salt
-		&req.ExpDate,                   // date d'expiration
+		req.Name,
+		req.Unity,
+		req.Quantity,
+		result2.Kcal,
+		result2.Protein,
+		result2.Fat,
+		result2.Carbohydrate,
+		result2.Fiber,
+		result2.Sugar,
+		result2.Salt,
+		&req.ExpDate,
 	)
 	if err != nil {
 		return err
@@ -168,4 +168,12 @@ func (s *service) getAll(ctx context.Context) ([]Item, error) {
 
 func (s *service) deleteItemByID(ctx context.Context, itemID string) error {
 	return s.repositoryManager.GetItemRepo().Delete(ctx, itemID)
+}
+
+func (s *service) getItemMacroByID(ctx context.Context, itemID string) (*itemDetails, error) {
+	item, err := s.repositoryManager.GetItemRepo().GetByID(ctx, itemID)
+	if err != nil || item == nil {
+		return nil, errors.New("error")
+	}
+	return newItemDetails(item.Kcal, item.Protein, item.Fat, item.Carbohydrate, item.Fiber, item.Sugar, item.Salt), nil
 }

@@ -17,17 +17,26 @@ func NewRepository(db *base.DatabaseManager, logger *base.Logger) *Repository {
 	return &Repository{DBManager: db, Logger: logger}
 }
 
-func (r *Repository) Create(ctx context.Context, name, unit string, quantity, kcal,
-	protein,
-	fat,
-	carbohydrate,
-	fiber,
-	sugar,
-	salt int, expDate *string) (sql.Result, error) {
+func (r *Repository) Create(ctx context.Context, name, unit string, quantity int, kcal, protein, fat, carbohydrate, fiber, sugar, salt float64, expDate *string) (sql.Result, error) {
+	fmt.Println(quantity, kcal, protein, fat, carbohydrate, fiber, sugar, salt)
 	query := `
 	INSERT INTO items (name, unit, quantity, expiration_date, energy_kcal, protein_g, fat_g, carbohydrate_g, fiber_g, sugar_g, salt_g ) VALUES (?,?,?,?,?,?,?,?,?,?,?);;
 	`
-	res, err := r.DBManager.DB.ExecContext(ctx, query, name, unit, quantity, expDate, kcal, protein, fat, carbohydrate, fiber, sugar, salt)
+	res, err := r.DBManager.DB.ExecContext(
+		ctx,
+		query,
+		name,
+		unit,
+		quantity,
+		expDate,
+		kcal,
+		protein,
+		fat,
+		carbohydrate,
+		fiber,
+		sugar,
+		salt,
+	)
 
 	if err != nil {
 		r.Logger.ErrorContext(ctx, "impossible de créer l'item", "err", err)
@@ -41,7 +50,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]ItemLite, error) {
 	rslt, err := r.DBManager.DB.QueryContext(ctx, query)
 
 	if err != nil {
-		return nil, fmt.Errorf("error")
+		return nil, errors.New("error")
 	}
 	defer rslt.Close()
 
@@ -54,7 +63,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]ItemLite, error) {
 	for rslt.Next() {
 		err = rslt.Scan(&id, &name, &quantity, &unit, &expDate)
 		if err != nil {
-			return nil, fmt.Errorf("error")
+			return nil, errors.New("error")
 		}
 		items = append(items, *NewItemLite(id, name, unit, quantity, expDate))
 	}
@@ -68,7 +77,48 @@ func (r *Repository) Delete(ctx context.Context, itemID string) error {
 
 	if err != nil {
 		r.Logger.ErrorContext(ctx, "impossible de delete", "err", err)
-		return fmt.Errorf("error")
+		return errors.New("error")
 	}
 	return nil
+}
+
+func (r *Repository) GetByID(ctx context.Context, itemID string) (*Model, error) {
+	query := `SELECT id, name, unit, quantity, expiration_date, energy_kcal, protein_g, fat_g, carbohydrate_g, fiber_g, sugar_g, salt_g FROM items i WHERE id = ?`
+	rslt, err := r.DBManager.DB.QueryContext(ctx, query, itemID)
+
+	if err != nil {
+		return nil, errors.New("error")
+	}
+	defer rslt.Close()
+
+	var (
+		item                                                               *Model
+		id, quantity, kcal, protein, fat, carbohydrate, fiber, sugar, salt int
+		name, unit                                                         string
+		expDate                                                            *string
+	)
+	if rslt.Next() {
+		err = rslt.Scan(
+			&id,
+			&name,
+			&unit,
+			&quantity,
+			&expDate,
+			&kcal,
+			&protein,
+			&fat,
+			&carbohydrate,
+			&fiber,
+			&sugar,
+			&salt,
+		)
+		if err != nil {
+			return nil, errors.New("error")
+		}
+
+		item = NewModel(id, name, unit, quantity, kcal, protein, fat, carbohydrate, fiber, sugar, salt, expDate)
+		return item, nil
+
+	}
+	return nil, nil
 }
