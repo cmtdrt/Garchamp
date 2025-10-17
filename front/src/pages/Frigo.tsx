@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -41,6 +41,24 @@ const Frigo = () => {
   });
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
   const [showMacrosDialog, setShowMacrosDialog] = useState(false);
+
+  // Hydrate depuis localStorage au chargement
+  useEffect(() => {
+    const stored = localStorage.getItem("frigo_items");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as FoodItem[];
+        setFoodItems(parsed);
+      } catch {
+        // ignore parsing errors
+      }
+    }
+  }, []);
+
+  // Persiste dans localStorage à chaque modification
+  useEffect(() => {
+    localStorage.setItem("frigo_items", JSON.stringify(foodItems));
+  }, [foodItems]);
 
   const allergenColors: Record<string, string> = {
     gluten: "bg-allergen-gluten",
