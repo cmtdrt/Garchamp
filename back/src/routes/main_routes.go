@@ -9,6 +9,7 @@ import (
 	"api/src/core/base"
 	"api/src/db"
 	"api/src/packages/fridge"
+	"api/src/packages/perf"
 	"api/src/packages/recipe"
 
 	"github.com/go-chi/chi/v5"
@@ -51,6 +52,7 @@ func SetupRouter(
 		})
 		r.Mount("/fridge", fridge.Route(repositoryManager, logger))
 		r.Mount("/recipe", recipe.Route(repositoryManager, logger))
+		r.Mount("/perf", perf.Route(repositoryManager, logger))
 	})
 
 	return r
