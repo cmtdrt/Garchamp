@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"farine de blé complet\",\r\n  \"quantity\": 2,\r\n  \"unity\": \"kg\",\r\n  \"exp_date\": \"2026-03-01\"\r\n}",
+							"raw": "{\r\n  \"name\": \"farine de blé complet\",\r\n  \"quantity\": 2,\r\n  \"unit\": \"kg\",\r\n  \"exp_date\": \"2026-03-01\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -96,13 +96,13 @@
 			"name": "recipe",
 			"item": [
 				{
-					"name": "New Request",
+					"name": "new recipe",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"allergens\": [\"lait\", \"arachides\"],\r\n  \"people_number\": 4,\r\n  \"items\": [\r\n    {\r\n      \"id\": 1,\r\n      \"name\": \"pâtes\",\r\n      \"quantity\": 300,\r\n      \"unit\": \"g\",\r\n      \"exp_date\": \"2025-12-01\"\r\n    },\r\n    {\r\n      \"id\": 2,\r\n      \"name\": \"lardons fumés\",\r\n      \"quantity\": 150,\r\n      \"unit\": \"g\",\r\n      \"exp_date\": \"2025-10-25\"\r\n    },\r\n    {\r\n      \"id\": 3,\r\n      \"name\": \"crème fraîche\",\r\n      \"quantity\": 100,\r\n      \"unit\": \"ml\",\r\n      \"exp_date\": \"2025-10-20\"\r\n    },\r\n    {\r\n      \"id\": 4,\r\n      \"name\": \"oignons\",\r\n      \"quantity\": 1,\r\n      \"unit\": \"pièce\",\r\n      \"exp_date\": \"2025-11-05\"\r\n    },\r\n    {\r\n      \"id\": 5,\r\n      \"name\": \"persil frais\",\r\n      \"quantity\": 5,\r\n      \"unit\": \"g\",\r\n      \"exp_date\": \"2025-10-30\"\r\n    }\r\n  ]\r\n}\r\n",
+							"raw": "{\r\n  \"allergens\": [\"lait\", \"arachides\"],\r\n  \"people_number\": 4,\r\n  \"items\": [\r\n  ]\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -136,6 +136,24 @@
 					],
 					"path": [
 						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "perf",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/perf/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"perf",
+						""
 					]
 				}
 			},
