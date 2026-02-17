@@ -1,31 +1,31 @@
 # 🧑‍🍳 Garchamp  
 
-**Ton chef privé préféré 🍳**
+**Your favorite private chef 🍳**
 
 ---
 
-## 🧭 Concept global  
+## 🧭 Overall Concept  
 
-### 🎯 Objectif  
+### 🎯 Objective  
 
-**Garchamp** est une application d’assistance culinaire locale propulsée par l’IA.  
-Le principe est simple : tu indiques les ingrédients que tu as dans ton frigo, et l’application te propose instantanément des **recettes rapides, économiques et écoresponsables**, accompagnées d’informations sur les **macronutriments** (protéines, lipides, glucides) de chaque ingrédient.  
+**Garchamp** is a local AI-powered cooking assistant application.  
+The principle is simple: you enter the ingredients you have in your fridge, and the app instantly suggests **quick, budget-friendly and eco-friendly recipes**, along with **macronutrient** information (proteins, fats, carbohydrates) for each ingredient.  
 
-L’objectif est double :  
+The goals are twofold:  
 
-- **Réduire le gaspillage alimentaire** en valorisant ce qu’on a déjà.  
-- **Faciliter le quotidien** en évitant les recherches interminables ou les courses inutiles.  
+- **Reduce food waste** by making the most of what you already have.  
+- **Simplify everyday life** by avoiding endless searches or unnecessary grocery trips.  
 
-En un mot : **Garchamp** transforme ton frigo en restaurant intelligent, directement **en local**, sans dépendre du cloud.  
+In short: **Garchamp** turns your fridge into a smart restaurant, entirely **locally**, with no cloud dependency.  
 
 ---
 
-## 🧑‍💻 Équipe & Contexte
+## 🧑‍💻 Team & Context
 
-Projet développé lors du Hackathon YNOV Nantes – 2025, sur 2 jours.
-L’objectif était de démontrer la faisabilité d’une IA utile et éthique, exécutée entièrement en local, au service du quotidien.
+Project developed during the YNOV Nantes Hackathon – 2025, over 2 days.
+The aim was to demonstrate the feasibility of a useful and ethical AI, running entirely on-device, serving everyday needs.
 
-Équipe :
+Team:
 
 - [Clément](https://github.com/cmtdrt)
 - [Mathis](https://github.com/MathisBess)
@@ -33,71 +33,71 @@ L’objectif était de démontrer la faisabilité d’une IA utile et éthique, 
 
 ---
 
-## ⚙️ Fonctionnement  
+## ⚙️ How It Works  
 
-1. L’utilisateur remplis son frigo.  
-2. L’IA locale (basée sur **Mistral:Instruct**) génère une propositions de recette.  
+1. The user fills in their fridge.  
+2. The local AI (based on **Mistral:Instruct**) generates recipe suggestions.  
 
-L’application fonctionne **entièrement en local** : aucune donnée personnelle ni alimentaire n’est envoyée vers des serveurs externes.  
+The application runs **entirely locally**: no personal or food data is sent to external servers.  
 
 ---
 
-## 🛠️ Développement  
+## 🛠️ Development  
 
-### 🧩 Technologies utilisées  
+### 🧩 Technologies Used  
 
-| Type | Technologie | Justification |
+| Type | Technology | Justification |
 |------|--------------|---------------|
-| Frontend | **React + TypeScript** | Interface fluide, typage strict et maintenance facilitée |
-| Backend | **Go (Golang) + Chi** | Performance, simplicité et compatibilité parfaite avec les API locales |
-| Base de données | **SQLite** | Légère, intégrée, parfaite pour une exécution locale sans dépendances |
-| Tests | **Postman** | Vérification rapide des endpoints et du comportement de l’API |
-| Linter | **golangci-lint** | Garantit la qualité et la cohérence du code backend |
-| Norme de commit | **Husky** | Standardisation des commits Git |
-| IA | **Mistral:Instruct** | Modèle **français / européen**, rapide, performant et souverain |
+| Frontend | **React + TypeScript** | Smooth UI, strict typing and easier maintenance |
+| Backend | **Go (Golang) + Chi** | Performance, simplicity and perfect compatibility with local APIs |
+| Database | **SQLite** | Lightweight, embedded, ideal for local execution with no external dependencies |
+| Testing | **Postman** | Quick verification of endpoints and API behavior |
+| Linter | **golangci-lint** | Ensures backend code quality and consistency |
+| Commit standard | **Husky** | Standardizes Git commits |
+| AI | **Mistral:Instruct** | **French / European** model, fast, performant and sovereign |
 
 ---
 
-### 💡 Justification des choix technologiques  
+### 💡 Rationale for Technology Choices  
 
-- **Local-first** : toutes les technologies sont légères et s’exécutent localement.  
-- **Open Source et souveraines** : priorité donnée à des outils européens et non dépendants du cloud américain.  
-- **Rapidité de développement** : React + Go offrent une excellente productivité.  
+- **Local-first**: all technologies are lightweight and run locally.  
+- **Open source and sovereign**: priority given to European tools with no dependency on US cloud.  
+- **Rapid development**: React + Go offer excellent productivity.  
 
 ---
 
-## 🚀 Lancement du projet  
+## 🚀 Getting Started  
 
 ### Installation  
 
 ```bash
-# Cloner le dépôt
+# Clone the repository
 git clone https://github.com/HackatonM1/Garchamp
 cd Garchamp
 
-# Démarrer le backend
+# Start the backend
 cd back
 go run main.go
 
-# Démarrer le frontend
+# Start the frontend
 cd ../front
 npm install
 npm start
 
-# Penser à configurer les .env
+# Remember to configure the .env files
 ```
 
 ---
 
-### Structure du projet
+### Project Structure
 
 ```md
 garchamp/
 │
 ├── back/       
-│   ├── src/ # API Go + Chi  
-│   ├── tests/ # Collection postman
-│   └── database.db # DB sqlite
+│   ├── src/ # Go + Chi API  
+│   ├── tests/ # Postman collection
+│   └── database.db # SQLite DB
 │
 ├── front/        # React + TypeScript
 │   ├── src/
@@ -110,48 +110,48 @@ garchamp/
 
 ---
 
-## 🌱 Impact énergétique
+## 🌱 Energy Impact
 
-Cette application combine un frontend léger en React/TypeScript avec un backend en Go et un modèle IA auto-hébergé (Mistral:Instruct). L’utilisation d’un modèle de langage local implique une consommation CPU/GPU significative.
+This application combines a lightweight React/TypeScript frontend with a Go backend and a self-hosted AI model (Mistral:Instruct). Using a local language model implies significant CPU/GPU usage.
 
-| Activité                              | Charge CPU/GPU moyenne                      | Consommation électrique moyenne | Comparaison                                          |
+| Activity                              | Average CPU/GPU load                      | Average power consumption | Comparison                                          |
 | ------------------------------------- | ------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
-| Garchamp (1 h) | CPU ~50–70 % | ~60–90 Wh                       | Équivalent à ~8–12 h de travail sur Microsoft Word   |
-| React + Go (1 h, sans IA)             | CPU ~10–15 %                                | ~10–15 Wh                       | Comparable à 1–2 h de Word                           |
-| Microsoft Word (1 h)                  | CPU ~5 %                                    | ~5–7 Wh                         | -                             |
-| Vidéo HD sur YouTube (1 h)            | CPU ~30 %                                   | ~20–25 Wh                       | - |
+| Garchamp (1 h) | CPU ~50–70 % | ~60–90 Wh                       | Equivalent to ~8–12 h of work in Microsoft Word   |
+| React + Go (1 h, no AI)             | CPU ~10–15 %                                | ~10–15 Wh                       | Comparable to 1–2 h of Word                           |
+| Microsoft Word (1 h)                  | CPU ~5 %                                    | ~5–7 Wh                         | -                             |
+| HD video on YouTube (1 h)            | CPU ~30 %                                   | ~20–25 Wh                       | - |
 
-Remarques :
+Notes:
 
-Les valeurs sont des moyennes sur un PC portable classique (Intel i7, 16 Go RAM).
-
----
-
-## ⚖️ Considérations éthiques
-
-Respect de la vie privée : aucune donnée n’est transmise à des serveurs externes.
-
-Souveraineté numérique : le choix de Mistral:Instruct garantit un traitement local, transparent et européen.
-
-Impact environnemental : en limitant le gaspillage alimentaire et la consommation de ressources cloud, Garchamp favorise un usage durable de l’IA.
-
-Accessibilité : interface simple, intuitive, adaptée à un large public.
-
-Transparence : l’utilisateur garde le contrôle sur ses données et comprend le fonctionnement du modèle.
+Values are averages on a typical laptop (Intel i7, 16 GB RAM).
 
 ---
 
-## 🚀 Bilan & Perspectives
+## ⚖️ Ethical Considerations
 
-Garchamp prouve qu’une IA locale peut être à la fois utile, économe et respectueuse de la vie privée.
-Les pistes d’évolution incluent :
+**Privacy**: no data is sent to external servers.
 
-1. Ajout d’une fonctionnalité de plan de repas sur la semaine.
+**Digital sovereignty**: choosing Mistral:Instruct ensures local, transparent and European processing.
 
-2. Intégration d’un mode “profil nutritionnel” (végétarien, sportif, etc.).
+**Environmental impact**: by limiting food waste and cloud resource consumption, Garchamp promotes sustainable use of AI.
 
-3. Enrichissement de la base d’ingrédients avec des données open source.
+**Accessibility**: simple, intuitive interface, suited to a wide audience.
 
-4. Ajout du recap nutritionnelle pour une recette/une part de recette
+**Transparency**: users keep control of their data and understand how the model works.
+
+---
+
+## 🚀 Summary & Roadmap
+
+Garchamp proves that local AI can be useful, efficient and privacy-respecting.
+Planned evolutions include:
+
+1. Adding a weekly meal plan feature.
+
+2. Integrating a “nutritional profile” mode (vegetarian, athlete, etc.).
+
+3. Enriching the ingredient database with open-source data.
+
+4. Adding nutritional recap per recipe or per serving.
 
 ✨ Made with ❤️ in Go & React — powered by Mistral:Instruct (FR/EU)
