@@ -11,10 +11,11 @@
 **Garchamp** is a local AI-powered cooking assistant application.  
 The principle is simple: you enter the ingredients you have in your fridge, and the app instantly suggests **quick, budget-friendly and eco-friendly recipes**, along with **macronutrient** information (proteins, fats, carbohydrates) for each ingredient.  
 
-The goals are twofold:  
+The goals are threefold:  
 
 - **Reduce food waste** by making the most of what you already have.  
 - **Simplify everyday life** by avoiding endless searches or unnecessary grocery trips.  
+- **Raise awareness of AI consumption and its environmental impact** — you can monitor your PC’s resource usage in real time (CPU load, power draw, memory) to see the cost of running the local model.  
 
 In short: **Garchamp** turns your fridge into a smart restaurant, entirely **locally**, with no cloud dependency.  
 
