@@ -2,6 +2,10 @@
 
 **Your favorite private chef 🍳**
 
+<img width="1512" height="909" alt="Capture d’écran 2026-02-17 à 22 43 19" src="https://github.com/user-attachments/assets/9150141b-a967-4171-93c1-07da31709f8c" />
+<img width="1512" height="909" alt="Capture d’écran 2026-02-17 à 22 43 27" src="https://github.com/user-attachments/assets/47cc9ea8-ca36-43be-9ded-f8af9e988ab4" />
+
+
 ---
 
 ## 🧭 Overall Concept  
